@@ -79,7 +79,6 @@ export function movementRoutes(db: DB) {
     if (!i.changes) throw new HttpError(404, 'Movimiento no encontrado');
     res.status(204).end();
   }));
-
   // ---------- Gmail (solo lectura) ----------
   r.get('/gmail/status', auth, wrap((req, res) => {
     const t = db.prepare('SELECT connected_at, last_sync_at FROM gmail_tokens WHERE user_id=?').get(req.user!.id) as { connected_at: string; last_sync_at: string | null } | undefined;

@@ -75,17 +75,31 @@ function buildBudgets(answers: Record<string, string | number>) {
   const transport = Number(answers.transport) || 10;
   const outingsBudget = Number(answers.outings_budget) || 30;
   const freq = String(answers.outings_freq ?? '');
-  // Salidas: multiplica presupuesto por salida × frecuencia semanal
+
+  // Salidas: presupuesto por salida × frecuencia semanal
   const freqMultiplier = freq.includes('todos los días') ? 4
     : freq.includes('Una o dos') ? 1.5
     : freq.includes('cada dos') ? 0.5
     : 0.25;
-  const outingsWeekly = Math.round(outingsBudget * freqMultiplier);
-  // Comida: almuerzo 5 días + snacks estimados
-  const foodWeekly = Math.round(food * 5 * 1.3);
-  // Ahorro sugerido: 10% de la mesada
-  const savingsWeekly = Math.round(weekly * 0.1);
-  return { foodWeekly, transport: Math.round(transport), outingsWeekly, savingsWeekly };
+  const outingsRaw = Math.round(outingsBudget * freqMultiplier);
+
+  // Comida: almuerzo × 5 días + 20% snacks — pero sin pasarse de la mitad de la mesada
+  const foodRaw = Math.round(food * 5 * 1.2);
+
+  // Ahorro: 10% de la mesada
+  const savingsRaw = Math.round(weekly * 0.1);
+
+  // Ajustar proporcionalmente para que la suma no supere la mesada
+  const available = weekly - savingsRaw;
+  const rawTotal = foodRaw + Math.round(transport) + outingsRaw;
+  const scale = rawTotal > available ? available / rawTotal : 1;
+
+  return {
+    foodWeekly: Math.max(5, Math.round(foodRaw * scale)),
+    transport: Math.max(2, Math.round(transport * scale)),
+    outingsWeekly: Math.max(5, Math.round(outingsRaw * scale)),
+    savingsWeekly: savingsRaw,
+  };
 }
 
 export default function Onboarding() {
@@ -179,7 +193,7 @@ export default function Onboarding() {
         <div className="muted" style={{ fontSize: 11, marginTop: 4, textAlign: 'right' }}>Paso {step + 1} de {STEPS.length}</div>
       </div>
 
-      <Mascot kind="huevo" size={90} />
+      <Mascot kind="pollito" size={90} />
 
       <div style={{ width: '100%', maxWidth: 360, marginTop: 20 }}>
         <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8, lineHeight: 1.3 }}>{current.question}</h2>

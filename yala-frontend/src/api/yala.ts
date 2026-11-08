@@ -17,9 +17,10 @@ export interface Dashboard {
 }
 export interface BudgetRow { category: Category; label: string; weeklyCap: number | null; spent: number; remaining: number | null; pct: number | null; today: number; hormiga: number; level: 'none' | 'ok' | 'warn' | 'over' }
 export interface Budgets { weeklyAllowance: number; savingsGoal: number | null; items: BudgetRow[] }
-export interface Plan { weekly: number; items: { category: Category; label: string; pct: number; amount: number }[]; reply: string; footnote: string }
-export interface LevelItem { key: 'huevo' | 'pollo' | 'gallo' | 'chivo' | 'goat'; name: string; hint: string; minWeeks: number; status: 'done' | 'current' | 'locked' }
-export interface Levels { streakWeeks: number; goatWeeks: number; weeksToGoat: number; savingsMet: boolean; level: LevelItem; levelNumber: number; levels: LevelItem[]; nextLevel: { name: string; weeksNeeded: number } | null }
+export interface Plan { weekly: number; isOuting?: boolean; items: { category: Category; label: string; pct: number; amount: number }[]; reply: string; footnote: string }
+export interface UserCategory { key: string; label: string; emoji: string; isSystem: boolean; hidden: boolean; sort_order: number }
+export interface LevelItem { key: 'pollito' | 'colibri' | 'conejo' | 'oveja' | 'goat'; name: string; hint: string; minWeeks: number; status: 'done' | 'current' | 'locked' }
+export interface Levels { streakWeeks: number; goatWeeks: number; weeksToGoat: number; savingsMet: boolean; level: LevelItem; levelNumber: number; levels: LevelItem[]; daysTo18: number | null; nextLevel: { name: string; weeksNeeded: number } | null }
 export interface Loan { id: number; friendNickname: string; amount: number; direction: 'lent' | 'borrowed'; concept: string | null; dueDate: string; paidAt: string | null; onTime: boolean | null; confirmedByFriend: boolean; remindedAt: string | null; status: 'pending' | 'overdue' | 'paid'; confirmLink: string }
 export interface Outing { id: number; name: string; budget: number; status: 'open' | 'finished'; spent: number; remaining: number; progressPct: number; withinBudget: boolean | null; movements: Movement[] }
 export interface Indicator { key: string; label: string; score: number | null; detail?: string }
@@ -27,6 +28,14 @@ export interface Profile { score: number | null; level: 'Inicial' | 'Constante' 
 export interface Certificate { code: string; createdAt: string; expiresAt: string; revoked: boolean; isDemo: boolean; views?: number; shareUrl?: string; payload: { holderFirstName: string; level: string; score: number | null; provisional: boolean; monthsOfHistory: number; indicators: { key: string; label: string; score: number | null }[]; generatedAt: string; demo: boolean; disclaimer: string } }
 export interface GmailStatus { configured: boolean; connected: boolean; connectedAt: string | null; lastSyncAt: string | null; unparsedEmails: number; senderFilter: string }
 export interface SplitResult { total: number; myShare: number; shares: { nickname: string; amount: number; loan: Loan | null; whatsappText: string }[] }
+export interface WeeklySummary {
+  allowance: number;
+  lastWeek: { total: number; within: boolean; withinBudget: boolean; byCategory: { category: string; spent: number }[] };
+  thisWeek: { total: number; byCategory: { category: string; spent: number }[] };
+  overBudget: { category: string; spent: number; cap: number; over: number }[];
+  suggestions: string[];
+  streakEffect: string | null;
+}
 
 export const api = {
   // auth
@@ -38,15 +47,17 @@ export const api = {
   // inicio
   dashboard: () => http<Dashboard>('/dashboard'),
   levels: () => http<Levels>('/levels'),
+  weeklySummary: () => http<WeeklySummary>('/weekly-summary'),
   // movimientos
   movements: (q: Record<string, string | number> = {}) => http<{ items: Movement[] }>('/movements?' + new URLSearchParams(Object.entries(q).map(([k, v]) => [k, String(v)]))),
   addMovement: (b: { amount: number; counterparty?: string; category?: Category; type?: 'expense' | 'income' }) => http<Movement>('/movements', { body: b }),
   setCategory: (id: number, category: Category) => http<Movement>(`/movements/${id}/category`, { method: 'PATCH', body: { category } }),
+  deleteMovement: (id: number) => http<void>(`/movements/${id}`, { method: 'DELETE' }),
   paste: (text: string) => http<{ imported: number; duplicates: number; unparsed: number; items: Movement[] }>('/movements/paste', { body: { text } }),
   // topes y asistente
   budgets: () => http<Budgets>('/budgets'),
   setBudget: (category: Category, weeklyAmount: number) => http<{ items: BudgetRow[] }>('/budgets', { method: 'PUT', body: { category, weeklyAmount } }),
-  plan: (message: string) => http<Plan>('/assistant/plan', { body: { message } }),
+  plan: (message: string, forceOuting?: boolean) => http<Plan>('/assistant/plan', { body: { message, ...(forceOuting ? { forceOuting: true } : {}) } }),
   applyPlan: (p: Plan) => http<{ items: BudgetRow[] }>('/assistant/apply', { body: { weekly: p.weekly, items: p.items.map((i) => ({ category: i.category, amount: i.amount })) } }),
   // gmail
   gmailStatus: () => http<GmailStatus>('/gmail/status'),
@@ -59,7 +70,7 @@ export const api = {
   addToOuting: (id: number, movementId: number) => http<Outing>(`/outings/${id}/movements`, { body: { movementId } }),
   finishOuting: (id: number) => http<Outing>(`/outings/${id}/finish`, { method: 'POST', body: {} }),
   loans: () => http<{ items: Loan[] }>('/loans'),
-  createLoan: (b: { friendNickname: string; amount: number; direction: 'lent' | 'borrowed'; concept?: string }) => http<Loan>('/loans', { body: b }),
+  createLoan: (b: { friendNickname: string; amount: number; direction: 'lent' | 'borrowed'; concept?: string; dueDate?: string }) => http<Loan>('/loans', { body: b }),
   remind: (id: number) => http<{ message: string; link: string; loan: Loan }>(`/loans/${id}/remind`, { method: 'POST', body: {} }),
   payLoan: (id: number, method: 'yape' | 'cash', movementId?: number) => http<Loan>(`/loans/${id}/pay`, { body: { method, movementId } }),
   loanSuggestions: () => http<{ items: { loanId: number; movement: Movement; reason: string }[] }>('/loans/suggestions'),
@@ -78,4 +89,8 @@ export const api = {
   publicCert: (code: string) => http<Certificate>(`/public/certificates/${code}`, { auth: false }),
   exportData: () => http<unknown>('/privacy/export'),
   deleteAll: () => http<void>('/privacy/data', { method: 'DELETE', body: { confirm: 'ELIMINAR' } }),
+  // categorías personalizadas
+  categories: () => http<{ items: UserCategory[] }>('/categories'),
+  addCategory: (b: { label: string; emoji?: string }) => http<{ items: UserCategory[] }>('/categories', { body: b }),
+  deleteCategory: (key: string) => http<{ items: UserCategory[] }>(`/categories/${key}`, { method: 'DELETE' }),
 };

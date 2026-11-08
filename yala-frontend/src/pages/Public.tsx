@@ -16,7 +16,7 @@ export function PublicLoan() {
   const x = l.data;
   return (
     <div className="login">
-      <Mascot kind="chivo" size={110} />
+      <Mascot kind="oveja" size={110} />
       <h2>Hola {x.friendNickname} 👋</h2>
       <p style={{ maxWidth: 300 }}>{x.ownerFirstName} anotó {soles(x.amount, true)}{x.concept ? ` de ${x.concept}` : ''} para el {shortDate(x.dueDate)}.</p>
       {(ok || x.confirmed) ? <div className="tag ok">¡Gracias! Confirmado ✓</div> : <button className="btn" onClick={async () => { await api.confirmLoan(token); setOk(true); }}>Sí, es correcto</button>}

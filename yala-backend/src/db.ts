@@ -137,6 +137,15 @@ CREATE TABLE IF NOT EXISTS certificate_views (
   certificate_id INTEGER NOT NULL REFERENCES certificates(id) ON DELETE CASCADE,
   viewed_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS user_categories (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  key TEXT NOT NULL,          -- slug normalizado, ej: "merch_enhypen"
+  label TEXT NOT NULL,        -- nombre visible, ej: "Merch Enhypen"
+  emoji TEXT NOT NULL DEFAULT '🏷️',
+  hidden INTEGER NOT NULL DEFAULT 0,  -- 1 = oculta (equivale a eliminar pero conserva historial)
+  sort_order INTEGER NOT NULL DEFAULT 99,
+  PRIMARY KEY (user_id, key)
+);
 `;
 
 export function openDb(file = config.dbPath): DB {

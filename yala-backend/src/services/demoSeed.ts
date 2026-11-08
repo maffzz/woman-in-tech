@@ -61,30 +61,30 @@ export function seedWeeks(db: DB, user: UserRow, o: SeedOpts) {
     const f = 1.0 - 0.18 * q;
     const t0 = base + w * 7 * DAY;
 
-    // Mesada (lunes)
-    mv(t0 + 13 * 3600_000, 60, 'income', 'Mamá (Rosa Z.)', 'otros');
-    if (r() < 0.35) mv(t0 + 3 * DAY + 20 * 3600_000, 20, 'income', 'Abuela Julia', 'otros');
+    // Mesada (lunes) — S/ 80 semanales
+    mv(t0 + 13 * 3600_000, 80, 'income', 'Mamá (Rosa Z.)', 'otros');
+    if (r() < 0.3) mv(t0 + 3 * DAY + 20 * 3600_000, 20, 'income', 'Abuela Julia', 'otros');
 
-    // Gastos hormiga: snacks (2–3 por semana, S/ 2–4)
+    // Gastos hormiga: snacks (2–3 por semana, S/ 2–3.50)
     const nSnacks = 2 + Math.floor(r() * 2);
-    for (let i = 0; i < nSnacks; i++) mv(t0 + (1 + i) * DAY + between(14, 19) * 3600_000, between(2, 4), 'expense', pick(SNACK), 'comida');
-    // Almuerzo escolar (lunes a viernes, S/ 5–8) — el gasto más recurrente de una adolescente
-    const nAlmuerzos = 3 + Math.floor(r() * 3); // 3–5 días
-    for (let i = 0; i < nAlmuerzos; i++) mv(t0 + (1 + i) * DAY + 13 * 3600_000, between(5, 8), 'expense', 'Menú escolar', 'comida');
+    for (let i = 0; i < nSnacks; i++) mv(t0 + (1 + i) * DAY + between(14, 19) * 3600_000, between(2, 3.5), 'expense', pick(SNACK), 'comida');
+    // Almuerzo escolar (lunes a viernes, S/ 6–9) — el gasto más recurrente de una adolescente
+    const nAlmuerzos = 3 + Math.floor(r() * 2); // 3–5 días
+    for (let i = 0; i < nAlmuerzos; i++) mv(t0 + (1 + i) * DAY + 13 * 3600_000, between(6, 9), 'expense', 'Menú escolar', 'comida');
     // Recarga (cada dos semanas aprox)
-    if (r() < 0.55) mv(t0 + 2 * DAY + 15 * 3600_000, 5, 'expense', 'Claro Recarga', 'recargas');
-    // Transporte (2 viajes, S/ 2–2.50)
-    for (let i = 0; i < 2; i++) mv(t0 + (1 + i * 2) * DAY + 12 * 3600_000, between(2, 2.5), 'expense', pick(TRANSPORT), 'transporte');
-    // Juegos: S/ 4–10 según calidad; spike puntual de S/ 20 solo 1 de cada 6 semanas con calidad baja
-    const spike = q < 0.35 && w % 6 === 3 ? 20 : 0;
-    mv(t0 + 4 * DAY + 21 * 3600_000, round2(4 + (1 - q) * 6 + spike), 'expense', pick(GAMES), 'juegos');
+    if (r() < 0.5) mv(t0 + 2 * DAY + 15 * 3600_000, 5, 'expense', 'Claro Recarga', 'recargas');
+    // Transporte (2 viajes, S/ 2–3)
+    for (let i = 0; i < 2; i++) mv(t0 + (1 + i * 2) * DAY + 12 * 3600_000, between(2, 3), 'expense', pick(TRANSPORT), 'transporte');
+    // Juegos: S/ 3–9 según calidad; spike de S/ 18 una vez cada 6 semanas con calidad baja
+    const spike = q < 0.3 && w % 6 === 4 ? 18 : 0;
+    mv(t0 + 4 * DAY + 21 * 3600_000, round2(3 + (1 - q) * 6 + spike), 'expense', pick(GAMES), 'juegos');
 
     // Salida del sábado (día 5), 15:00-22:00 Lima = 20:00-03:00 UTC
     const startT = t0 + 5 * DAY + 20 * 3600_000;
     const endT = t0 + 6 * DAY + 3 * 3600_000;
     const budget = 30;
-    // Con q bajo puede pasarse un poco (hasta S/ 32); con q alto se queda en S/ 20–26
-    const target = budget * (1.05 - 0.22 * q) * (0.85 + r() * 0.18);
+    // Con q bajo puede pasarse de S/80 (hasta ~S/84); con q alto queda en S/60–70
+    const target = 26 * (1.04 - 0.28 * q) * (0.85 + r() * 0.18);
     const parts = 2 + Math.floor(r() * 2);
     const ids: number[] = [];
     let spent = 0;
@@ -160,12 +160,17 @@ export function clearUserData(db: DB, userId: number) {
   db.prepare('UPDATE users SET demo_offset_days=0 WHERE id=?').run(userId);
 }
 
-/** Estado inicial de la demo: ~5 semanas de hábitos mejorables (nivel Inicial/Pollo). */
+/** Estado inicial de la demo: 9 semanas de historial que dejan a Diana en nivel Conejo.
+ *  - Mesada: S/ 80 semanales (más realista con almuerzo diario en Lima)
+ *  - Las 4 semanas pasadas más recientes están dentro del presupuesto → Conejo (minWeeks=4)
+ *  - Hábitos mejoran de qStart=0.15 (irregular) a qEnd=0.88 (constante)
+ */
 export function seedDemoStart(db: DB, user: UserRow) {
   clearUserData(db, user.id);
+  // Actualizar mesada a S/ 80
+  db.prepare('UPDATE users SET weekly_allowance=80 WHERE id=?').run(user.id);
   const u = db.prepare('SELECT * FROM users WHERE id=?').get(user.id) as UserRow;
-  // qStart bajo = gasta más y de forma irregular → nivel bajo al inicio
-  seedWeeks(db, u, { weeks: 5, qStart: 0.0, qEnd: 0.15, seed: 7 });
+  seedWeeks(db, u, { weeks: 9, qStart: 0.15, qEnd: 0.88, seed: 17 });
   pendingLoans(db, u);
   fillOpinions(db, u);
 }

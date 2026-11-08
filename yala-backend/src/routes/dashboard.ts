@@ -74,5 +74,75 @@ export function dashboardRoutes(db: DB) {
     res.json(await adviceForToday(db, req.user!, req.query.refresh === 'true'));
   }));
 
+  /** Resumen de la semana: qué gastaste, dónde te pasaste, sugerencias para la próxima. */
+  r.get('/weekly-summary', auth, wrap((req, res) => {
+    const u = req.user!;
+    const now = nowFor(u);
+    const allowance = u.weekly_allowance ?? 60;
+
+    // Semana pasada (w=1) y actual (w=0)
+    const from1 = new Date(now.getTime() - 14 * DAY).toISOString();
+    const to1   = new Date(now.getTime() -  7 * DAY).toISOString();
+    const from0 = to1;
+    const to0   = now.toISOString();
+
+    const spentByCategory = (from: string, to: string) =>
+      (db.prepare("SELECT category, SUM(amount) s FROM movements WHERE user_id=? AND type='expense' AND occurred_at>=? AND occurred_at<=? GROUP BY category")
+        .all(u.id, from, to) as { category: string; s: number }[]).map((r) => ({ category: r.category, spent: round2(r.s) }));
+
+    const caps = db.prepare('SELECT category, weekly_amount FROM budgets WHERE user_id=?').all(u.id) as { category: string; weekly_amount: number }[];
+    const capMap = new Map(caps.map((c) => [c.category, c.weekly_amount]));
+
+    const lastWeek = spentByCategory(from1, to1);
+    const thisWeek = spentByCategory(from0, to0);
+    const totalLast = round2(lastWeek.reduce((a, b) => a + b.spent, 0));
+    const totalThis = round2(thisWeek.reduce((a, b) => a + b.spent, 0));
+
+    // Categorías donde se pasó del tope la semana pasada
+    const overBudget = lastWeek
+      .filter((c) => { const cap = capMap.get(c.category); return cap !== undefined && c.spent > cap; })
+      .map((c) => ({ category: c.category, spent: c.spent, cap: capMap.get(c.category)!, over: round2(c.spent - capMap.get(c.category)!) }))
+      .sort((a, b) => b.over - a.over);
+
+    // Categoría con más gasto
+    const topSpend = [...lastWeek].sort((a, b) => b.spent - a.spent)[0] ?? null;
+
+    // Generación de sugerencias
+    const suggestions: string[] = [];
+    if (overBudget.length > 0) {
+      const top = overBudget[0];
+      suggestions.push(`En ${top.category} te pasaste S/ ${top.over} de tu tope. Para la próxima semana podrías reducir un poco ahí.`);
+    }
+    if (totalLast > allowance) {
+      suggestions.push(`Esta semana gastaste S/ ${round2(totalLast - allowance)} más de tu mesada. Intenta cerrar la próxima dentro de S/ ${allowance}.`);
+    } else if (totalLast <= allowance * 0.85) {
+      suggestions.push(`¡Muy bien! La semana pasada te quedaste dentro del presupuesto y te sobró S/ ${round2(allowance - totalLast)}.`);
+    }
+    if (topSpend && topSpend.spent > allowance * 0.4) {
+      suggestions.push(`${topSpend.category} fue tu mayor gasto (S/ ${topSpend.spent}). ¿Vale lo que gastaste ahí?`);
+    }
+
+    // ¿Sumó a la racha?
+    const stats = weeklyStats(db, u, 3);
+    const lastWithin = stats[1]?.within ?? false; // semana pasada
+
+    res.json({
+      allowance,
+      lastWeek: {
+        total: totalLast,
+        within: totalLast <= allowance,
+        withinBudget: lastWithin,
+        byCategory: lastWeek.sort((a, b) => b.spent - a.spent),
+      },
+      thisWeek: {
+        total: totalThis,
+        byCategory: thisWeek.sort((a, b) => b.spent - a.spent),
+      },
+      overBudget,
+      suggestions,
+      streakEffect: lastWithin ? '+1 semana a tu racha 🔥' : null,
+    });
+  }));
+
   return r;
 }

@@ -21,7 +21,7 @@ export default function Login() {
 
   return (
     <div className="login">
-      <Mascot kind="chivo" size={150} />
+      <Mascot kind="goat" size={150} />
       <h1>Yala</h1>
       <p className="muted" style={{ maxWidth: 280 }}>Tu plata, tus panas y tu racha. Sin regaños.</p>
       <div style={{ width: '100%', maxWidth: 320, marginTop: 22, display: 'grid', gap: 10 }}>
