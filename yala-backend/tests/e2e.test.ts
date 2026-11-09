@@ -27,7 +27,7 @@ describe('flujo completo', () => {
     const r = await api('/dashboard');
     expect(r.status).toBe(200);
     expect(r.body.advice.text.length).toBeGreaterThan(5);
-    // Diana puede arrancar en cualquier nivel según los datos generados; lo importante es que exista
+    // Sofia puede arrancar en cualquier nivel según los datos generados; lo importante es que exista
     expect(['Inicial', 'Constante', 'Confiable', 'Sólido']).toContain(r.body.profile.level);
   });
   it('pegar un correo crea movimiento con categoría y opinión', async () => {

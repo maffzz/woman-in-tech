@@ -10,7 +10,7 @@ cd ../yala-backend && cp .env.example .env && npm install && npm run dev      # 
 cp .env.example .env     # VITE_API_URL=http://localhost:4000/api
 npm install && npm run dev                                                    # http://localhost:5173
 ```
-Entra con **"Entrar como Diana (demo)"**: no necesita Gmail ni API key. En `yala-backend/.env`, `FRONTEND_URL` debe ser la URL del front (por defecto `http://localhost:5173`).
+Entra con **"Entrar como Sofia (demo)"**: no necesita Gmail ni API key. En `yala-backend/.env`, `FRONTEND_URL` debe ser la URL del front (por defecto `http://localhost:5173`).
 
 ## Pantallas
 | Ruta | Qué es | Endpoints |

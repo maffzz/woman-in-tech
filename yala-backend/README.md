@@ -10,7 +10,7 @@ npm run dev          # http://localhost:4000/api
 npm test             # 26 pruebas
 npm run typecheck
 ```
-Prueba rápida: `curl -X POST localhost:4000/api/auth/demo` devuelve `{token,user}` de Diana Zuñiga con datos de demo.
+Prueba rápida: `curl -X POST localhost:4000/api/auth/demo` devuelve `{token,user}` de Sofia Zuñiga con datos de demo.
 
 ## Modos
 - **Datos**: `demo` (datos sembrados) · `pegado` (el usuario pega el correo de Yape/BCP) · `gmail` (lectura real, solo lectura).
@@ -31,7 +31,7 @@ Puedes elegir entre **Claude (Anthropic)** o **Gemini (Google)**. Se controla co
 
 Si el proveedor falla (429, 5xx, timeout, JSON inválido), el sistema usa automáticamente las plantillas de palabras clave como respaldo. Hay un reintento automático y un límite de 2 llamadas concurrentes para no reventar el cupo gratuito.
 
-> **Nota de privacidad (Gemini):** El plan gratuito de la API de Gemini puede usar las conversaciones para mejorar productos de Google ([ver política](https://ai.google.dev/gemini-api/terms)). Por eso, en producción con datos reales de usuarios se recomienda usar Claude o el plan de pago de Gemini. Para la demo (datos ficticios de Diana) no hay problema.
+> **Nota de privacidad (Gemini):** El plan gratuito de la API de Gemini puede usar las conversaciones para mejorar productos de Google ([ver política](https://ai.google.dev/gemini-api/terms)). Por eso, en producción con datos reales de usuarios se recomienda usar Claude o el plan de pago de Gemini. Para la demo (datos ficticios de Sofia) no hay problema.
 
 ## Remitentes aceptados (Yape + BCP)
 

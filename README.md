@@ -8,7 +8,7 @@ App financiera para adolescentes peruanos de 15 a 17 años que reciben dinero po
 
 ## El problema que resuelve
 
-Diana tiene 16 años, recibe S/ 80 semanales por Yape y no sabe en qué se le va la plata. No tiene historial crediticio. A los 18 será invisible para los bancos. Yala construye esa data desde ahora, con sus propios hábitos reales, sin supervisión de padres ni formularios bancarios.
+Sofia tiene 16 años, recibe S/ 80 semanales por Yape y no sabe en qué se le va la plata. No tiene historial crediticio. A los 18 será invisible para los bancos. Yala construye esa data desde ahora, con sus propios hábitos reales, sin supervisión de padres ni formularios bancarios.
 
 ---
 
@@ -48,7 +48,7 @@ npm run dev            # http://localhost:5173
 curl -X POST http://localhost:4000/api/auth/demo
 ```
 
-Devuelve un token de Diana Zuñiga con 9 semanas de historial generado, nivel Conejo y préstamos pendientes listos para la demo. Abre `http://localhost:5173` → "Entrar como Diana (demo)".
+Devuelve un token de Sofia Zuñiga con 9 semanas de historial generado, nivel Conejo y préstamos pendientes listos para la demo. Abre `http://localhost:5173` → "Entrar como Sofia (demo)".
 
 ---
 

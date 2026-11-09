@@ -1,5 +1,5 @@
 /**
- * Datos de demo de "Diana" (16 años, S/ 60 semanales por Yape).
+ * Datos de demo de "Sofia" (16 años, S/ 60 semanales por Yape).
  * Genera movimientos, salidas y préstamos relativos al "ahora" del usuario, de forma determinista.
  */
 import type { DB } from '../db';
@@ -99,7 +99,7 @@ export function seedWeeks(db: DB, user: UserRow, o: SeedOpts) {
     );
     ids.forEach((id) => insOM.run(oid, id));
 
-    // Préstamos: Diana debe cada ~3 semanas; presta cada ~4 semanas
+    // Préstamos: Sofia debe cada ~3 semanas; presta cada ~4 semanas
     if (w % 3 === 1) {
       const amt = pick([8, 10, 12]);
       const created = t0 + 2 * DAY;
@@ -160,7 +160,7 @@ export function clearUserData(db: DB, userId: number) {
   db.prepare('UPDATE users SET demo_offset_days=0 WHERE id=?').run(userId);
 }
 
-/** Estado inicial de la demo: 9 semanas de historial que dejan a Diana en nivel Conejo.
+/** Estado inicial de la demo: 9 semanas de historial que dejan a Sofia en nivel Conejo.
  *  - Mesada: S/ 80 semanales (más realista con almuerzo diario en Lima)
  *  - Las 4 semanas pasadas más recientes están dentro del presupuesto → Conejo (minWeeks=4)
  *  - Hábitos mejoran de qStart=0.15 (irregular) a qEnd=0.88 (constante)

@@ -25,7 +25,7 @@ export default function Login() {
       <h1>Yala</h1>
       <p className="muted" style={{ maxWidth: 280 }}>Con Yala, cada yapeo cuenta.</p>
       <div style={{ width: '100%', maxWidth: 320, marginTop: 22, display: 'grid', gap: 10 }}>
-        <button className="btn" disabled={busy} onClick={() => run(api.demo)}>Entrar como Diana (demo)</button>
+        <button className="btn" disabled={busy} onClick={() => run(api.demo)}>Entrar como Sofia (demo)</button>
         <button className="btn ghost" disabled={busy} onClick={google}>Continuar con Google</button>
         <button className="btn ghost" style={{ border: 0, fontSize: 12, color: 'var(--muted)' }} onClick={() => setDev(!dev)}>Entrar con otro correo (desarrollo)</button>
         {dev && (

@@ -21,14 +21,14 @@ export const userDto = (u: UserRow) => ({
 export function authRoutes(db: DB) {
   const r = Router();
 
-  /** Entra como Diana (demo). Crea el usuario y siembra sus datos si no existe. */
+  /** Entra como Sofia (demo). Crea el usuario y siembra sus datos si no existe. */
   r.post('/auth/demo', wrap((req, res) => {
     if (!config.allowDemo) throw new HttpError(403, 'El modo demo está desactivado');
     const reseed = req.query.reset === 'true';
-    let u = db.prepare("SELECT * FROM users WHERE email='diana.demo@yala.app'").get() as UserRow | undefined;
+    let u = db.prepare("SELECT * FROM users WHERE email='Sofia.demo@yala.app'").get() as UserRow | undefined;
     if (!u) {
-      db.prepare(`INSERT INTO users (email, name, birth_date, weekly_allowance, data_mode, is_demo) VALUES ('diana.demo@yala.app','Diana Zuñiga','2010-03-14',60,'demo',1)`).run();
-      u = db.prepare("SELECT * FROM users WHERE email='diana.demo@yala.app'").get() as UserRow;
+      db.prepare(`INSERT INTO users (email, name, birth_date, weekly_allowance, data_mode, is_demo) VALUES ('Sofia.demo@yala.app','Sofia Zuñiga','2010-03-14',60,'demo',1)`).run();
+      u = db.prepare("SELECT * FROM users WHERE email='Sofia.demo@yala.app'").get() as UserRow;
       seedDemoStart(db, u);
     } else if (reseed) {
       seedDemoStart(db, u);
