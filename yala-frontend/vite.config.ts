@@ -9,7 +9,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg', 'icons/apple-icon-180.png'],
       manifest: {
-        name: 'Yala — Tu plata, tus panas',
+        name: 'Con Yala, cada yapeo cuenta.',
         short_name: 'Yala',
         description: 'Gestiona tus gastos, salidas con amigos y construye tu historial financiero.',
         start_url: '/',
