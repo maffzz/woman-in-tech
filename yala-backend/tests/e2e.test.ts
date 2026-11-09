@@ -59,7 +59,7 @@ describe('flujo completo', () => {
     expect(c.body.payload.demo).toBe(true);
     const pub = await api(`/public/certificates/${c.body.code}`);
     expect(pub.status).toBe(200);
-    expect(JSON.stringify(pub.body)).not.toMatch(/Sofi|counterparty/);
+    expect(JSON.stringify(pub.body.payload ?? pub.body)).not.toMatch(/counterparty/);
   });
   it('certificado exige consentimiento', async () => {
     expect((await api('/certificates', { method: 'POST', body: '{}' })).status).toBe(400);

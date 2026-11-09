@@ -7,7 +7,6 @@ import { ErrorNote, Header, Loading, Page } from '../components/Ui';
 import { greeting, firstName, soles } from '../lib/format';
 import { useApi } from '../lib/useApi';
 import { useAuth } from '../lib/auth';
-
 const SECS = [['comida', '#5fe8d8'], ['transporte', '#8fd3f7'], ['salidas', '#e4a8f0'], ['suscripciones', '#8f7bf0']] as const;
 const LABEL: Record<string, string> = { comida: 'Comida', transporte: 'Transporte', salidas: 'Salidas', suscripciones: 'Suscrip.' };
 const levelKey = (name: string): MascotKey => {
@@ -30,27 +29,90 @@ function InfoTooltip({ text }: { text: string }) {
   );
 }
 
-/** Burbuja colapsable del consejo del día */
-function AdviceBubble({ text }: { text: string }) {
-  const [open, setOpen] = useState(false);
+/** Mascota flotante que sirve de asistente — consejo del día sale de ella */
+function MascotAssistant({ mascotKind, adviceText, onOpenAssistant }: {
+  mascotKind: MascotKey;
+  adviceText: string;
+  onOpenAssistant: () => void;
+}) {
+  const [bubbleOpen, setBubbleOpen] = useState(false);
+  const [fullOpen, setFullOpen] = useState(false);
+
   return (
     <>
-      <button
-        className="advice-bubble"
-        onClick={() => setOpen(true)}
-        aria-label="Ver consejo del día"
-      >
-        <span style={{ fontSize: 20 }}>💡</span>
-        <span style={{ flex: 1, textAlign: 'left', fontSize: 13, fontWeight: 600 }}>Consejo del día</span>
-        <span style={{ fontSize: 12, opacity: 0.6 }}>toca para abrir →</span>
-      </button>
-      {open && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(42,26,107,0.5)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={() => setOpen(false)}>
-          <div style={{ background: '#fff', borderRadius: 24, padding: 28, maxWidth: 360, width: '100%', textAlign: 'center', boxShadow: '0 8px 40px rgba(42,26,107,0.25)' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>💡</div>
-            <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 12, color: 'var(--ink)' }}>Consejo del día</div>
-            <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--ink)', margin: '0 0 24px' }}>{text}</p>
-            <button className="btn block" onClick={() => setOpen(false)}>¡Entendido!</button>
+      {/* Mascota flotante */}
+      <div style={{ position: 'fixed', bottom: 'calc(88px + env(safe-area-inset-bottom))', right: 18, zIndex: 30 }}>
+        {/* Burbuja de consejo (aparece al tocar la mascota) */}
+        {bubbleOpen && (
+          <div style={{
+            position: 'absolute', bottom: 70, right: 0, width: 220,
+            background: '#fff', borderRadius: 18, padding: '12px 14px',
+            boxShadow: '0 4px 24px rgba(42,26,107,.2)',
+            border: '2px solid var(--lav2)', animation: 'pop-in .2s ease',
+          }}>
+            <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--ink)', marginBottom: 8 }}>
+              {adviceText}
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button
+                onClick={() => { setFullOpen(true); setBubbleOpen(false); }}
+                style={{ flex: 1, background: 'var(--purple)', color: '#fff', border: 0, borderRadius: 10, padding: '6px 0', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+              >
+                Ver más
+              </button>
+              <button
+                onClick={onOpenAssistant}
+                style={{ flex: 1, background: 'var(--lav2)', border: 0, borderRadius: 10, padding: '6px 0', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+              >
+                Preguntarle
+              </button>
+            </div>
+            {/* Triángulo apuntando a la mascota */}
+            <div style={{
+              position: 'absolute', bottom: -8, right: 18,
+              width: 0, height: 0,
+              borderLeft: '8px solid transparent', borderRight: '8px solid transparent',
+              borderTop: '8px solid var(--lav2)',
+            }} />
+          </div>
+        )}
+
+        {/* La mascota en sí */}
+        <button
+          onClick={() => setBubbleOpen(!bubbleOpen)}
+          aria-label="Abrir consejo de tu mascota"
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            filter: 'drop-shadow(0 4px 12px rgba(107,73,212,.35))',
+            transition: 'transform .15s',
+            transform: bubbleOpen ? 'scale(1.1)' : 'scale(1)',
+          }}
+        >
+          <Mascot kind={mascotKind} size={58} />
+        </button>
+      </div>
+
+      {/* Modal completo del consejo */}
+      {fullOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(42,26,107,0.5)', zIndex: 60,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+        }} onClick={() => setFullOpen(false)}>
+          <div style={{
+            background: '#fff', borderRadius: 24, padding: 28, maxWidth: 360, width: '100%',
+            textAlign: 'center', boxShadow: '0 8px 40px rgba(42,26,107,0.25)',
+          }} onClick={(e) => e.stopPropagation()}>
+            <Mascot kind={mascotKind} size={80} style={{ marginBottom: 12 }} />
+            <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 12 }}>Consejo del día</div>
+            <p style={{ fontSize: 15, lineHeight: 1.6, margin: '0 0 20px' }}>{adviceText}</p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn" style={{ flex: 1 }} onClick={onOpenAssistant}>
+                Hablar con tu asistente
+              </button>
+              <button className="btn ghost" style={{ flex: 1 }} onClick={() => setFullOpen(false)}>
+                Entendido
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -63,6 +125,15 @@ export default function Home() {
   const nav = useNavigate();
   const d = useApi(api.dashboard);
   const b = useApi(api.budgets);
+  const [hasPending, setHasPending] = useState(false);
+
+  // Detectar si hay gastos pendientes de revisión del auto-sync
+  useEffect(() => {
+    const check = () => setHasPending(!!sessionStorage.getItem('yala_pending_review'));
+    check();
+    window.addEventListener('yala:new-movements', check);
+    return () => window.removeEventListener('yala:new-movements', check);
+  }, []);
 
   if (d.loading && !d.data) return <Page><Loading /></Page>;
   if (d.error || !d.data) return <Page><ErrorNote msg={d.error ?? 'Error'} retry={d.reload} /></Page>;
@@ -71,6 +142,26 @@ export default function Home() {
   return (
     <Page>
       <Header kicker={`Hola, ${firstName(user?.name ?? '')}`} title={greeting()} right={<Link className="pill" to="/niveles">Nivel {x.level.number} · {x.level.name}</Link>} />
+
+      {/* Banner de gastos nuevos del auto-sync */}
+      {hasPending && (
+        <button
+          onClick={() => nav('/conectar')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 12, width: '100%', border: 'none',
+            background: 'linear-gradient(135deg, #6b49d4, #8f7bf0)',
+            borderRadius: 18, padding: '14px 16px', cursor: 'pointer', marginBottom: 14,
+            animation: 'pop-in .25s ease',
+          }}
+        >
+          <span style={{ fontSize: 26 }}>📩</span>
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>Tienes gastos nuevos</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,.8)', marginTop: 2 }}>Toca para revisar y confirmar categorías</div>
+          </div>
+          <span style={{ color: 'rgba(255,255,255,.7)', fontSize: 18 }}>›</span>
+        </button>
+      )}
 
       {/* Card mascota + racha */}
       <div className="card hero">
@@ -82,7 +173,15 @@ export default function Home() {
       </div>
 
       {/* Consejo del día — burbuja */}
-      <AdviceBubble text={x.advice.text} />
+      <button
+        className="advice-bubble"
+        onClick={() => {}}
+        style={{ pointerEvents: 'none', opacity: 0.5 }}
+        aria-hidden
+      >
+        <span style={{ fontSize: 20 }}>💡</span>
+        <span style={{ flex: 1, textAlign: 'left', fontSize: 13, fontWeight: 600 }}>Toca a tu mascota para el consejo del día →</span>
+      </button>
       {/* Stats */}
       <div className="section-title"><span>Stats de hoy</span><Link to="/secciones">Ver todo</Link></div>
       <div className="stats">
@@ -152,15 +251,12 @@ export default function Home() {
         <Link to="/niveles"><span>🐐</span>Mis niveles</Link>
       </div>
 
-      {/* Botón flotante del asistente */}
-      <button
-        className="fab-assistant"
-        onClick={() => nav('/asistente')}
-        aria-label="Abrir asistente"
-        title="Asistente IA"
-      >
-        🤖
-      </button>
+      {/* Mascota flotante — asistente + consejo del día */}
+      <MascotAssistant
+        mascotKind={levelKey(x.level.name)}
+        adviceText={x.advice.text}
+        onOpenAssistant={() => nav('/asistente')}
+      />
     </Page>
   );
 }

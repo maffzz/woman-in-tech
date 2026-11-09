@@ -146,6 +146,26 @@ CREATE TABLE IF NOT EXISTS user_categories (
   sort_order INTEGER NOT NULL DEFAULT 99,
   PRIMARY KEY (user_id, key)
 );
+CREATE TABLE IF NOT EXISTS friendships (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  friend_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  nickname TEXT NOT NULL,            -- apodo que le pone este usuario a su amigo
+  token TEXT UNIQUE NOT NULL,        -- link de invitación
+  accepted INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, friend_user_id)
+);
+CREATE INDEX IF NOT EXISTS ix_friendships_user ON friendships(user_id);
+CREATE INDEX IF NOT EXISTS ix_friendships_token ON friendships(token);
+CREATE TABLE IF NOT EXISTS donations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  from_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  to_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount REAL NOT NULL,              -- S/ 0.10, 0.20, 0.50
+  message TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `;
 
 export function openDb(file = config.dbPath): DB {

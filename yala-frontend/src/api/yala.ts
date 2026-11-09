@@ -28,6 +28,17 @@ export interface Profile { score: number | null; level: 'Inicial' | 'Constante' 
 export interface Certificate { code: string; createdAt: string; expiresAt: string; revoked: boolean; isDemo: boolean; views?: number; shareUrl?: string; payload: { holderFirstName: string; level: string; score: number | null; provisional: boolean; monthsOfHistory: number; indicators: { key: string; label: string; score: number | null }[]; generatedAt: string; demo: boolean; disclaimer: string } }
 export interface GmailStatus { configured: boolean; connected: boolean; connectedAt: string | null; lastSyncAt: string | null; unparsedEmails: number; senderFilter: string }
 export interface SplitResult { total: number; myShare: number; shares: { nickname: string; amount: number; loan: Loan | null; whatsappText: string }[] }
+export interface FriendActivity {
+  friendshipId: number;
+  nickname: string;
+  levelName: string;
+  levelNumber: number;
+  levelKey: string;
+  streakWeeks: number;
+  isMigajeando: boolean;
+  migajeandoIn: string | null;
+  weekPct: number;
+}
 export interface WeeklySummary {
   allowance: number;
   lastWeek: { total: number; within: boolean; withinBudget: boolean; byCategory: { category: string; spent: number }[] };
@@ -71,7 +82,7 @@ export const api = {
   finishOuting: (id: number) => http<Outing>(`/outings/${id}/finish`, { method: 'POST', body: {} }),
   loans: () => http<{ items: Loan[] }>('/loans'),
   createLoan: (b: { friendNickname: string; amount: number; direction: 'lent' | 'borrowed'; concept?: string; dueDate?: string }) => http<Loan>('/loans', { body: b }),
-  remind: (id: number) => http<{ message: string; link: string; loan: Loan }>(`/loans/${id}/remind`, { method: 'POST', body: {} }),
+  remind: (id: number, carinioLevel?: 0 | 1 | 2) => http<{ message: string; link: string; loan: Loan }>(`/loans/${id}/remind`, { method: 'POST', body: { carinioLevel: carinioLevel ?? 1 } }),
   payLoan: (id: number, method: 'yape' | 'cash', movementId?: number) => http<Loan>(`/loans/${id}/pay`, { body: { method, movementId } }),
   loanSuggestions: () => http<{ items: { loanId: number; movement: Movement; reason: string }[] }>('/loans/suggestions'),
   simulateConfirm: (id: number) => http<Loan>(`/loans/${id}/simulate-confirm`, { method: 'POST', body: {} }),
@@ -89,7 +100,11 @@ export const api = {
   publicCert: (code: string) => http<Certificate>(`/public/certificates/${code}`, { auth: false }),
   exportData: () => http<unknown>('/privacy/export'),
   deleteAll: () => http<void>('/privacy/data', { method: 'DELETE', body: { confirm: 'ELIMINAR' } }),
-  // categorías personalizadas
+  // amigos / actividad social
+  friendsActivity: () => http<{ items: FriendActivity[] }>('/friends/demo-activity'),
+  friendInviteLink: () => http<{ link: string; token: string }>('/friends/invite', { method: 'POST', body: {} }),
+  friendJoin: (tok: string) => http<{ ok: boolean; message: string }>(`/friends/join/${tok}`, { method: 'POST', body: {} }),
+  friendDonate: (friendshipId: number, amount: number, message?: string) => http<{ ok: boolean; message: string }>(`/friends/${friendshipId}/donate`, { body: { amount, message } }),
   categories: () => http<{ items: UserCategory[] }>('/categories'),
   addCategory: (b: { label: string; emoji?: string }) => http<{ items: UserCategory[] }>('/categories', { body: b }),
   deleteCategory: (key: string) => http<{ items: UserCategory[] }>(`/categories/${key}`, { method: 'DELETE' }),

@@ -1,5 +1,7 @@
+import { useEffect, useRef } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './lib/auth';
+import { api, type Movement } from './api/yala';
 import { Loading } from './components/Ui';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -18,6 +20,42 @@ const isNewUser = (user: import('./api/yala').User) =>
 
 export default function App() {
   const { user, ready } = useAuth();
+  const lastSyncRef = useRef<number>(0);
+
+  // Auto-sync silencioso cuando el usuario tiene Gmail conectado
+  // Se lanza al abrir la app y cuando vuelve de segundo plano
+  useEffect(() => {
+    if (!user || user.dataMode !== 'gmail' || user.isDemo) return;
+
+    const doSync = async () => {
+      const now = Date.now();
+      // No sincronizar más de una vez cada 5 minutos
+      if (now - lastSyncRef.current < 5 * 60 * 1000) return;
+      lastSyncRef.current = now;
+      try {
+        const r = await api.gmailSync();
+        if (r.imported > 0) {
+          // Guardar en sessionStorage para que Connect los muestre
+          const mv = await api.movements({ limit: r.imported });
+          const pending = mv.items.slice(0, r.imported);
+          sessionStorage.setItem('yala_pending_review', JSON.stringify(pending));
+          // Disparar evento para que Connect lo detecte si está abierto
+          window.dispatchEvent(new CustomEvent('yala:new-movements', { detail: pending }));
+        }
+      } catch {
+        // Falla silenciosamente — el usuario puede sincronizar manualmente
+      }
+    };
+
+    // Sync al cargar
+    doSync();
+
+    // Sync cuando la app vuelve a primer plano (tab visible)
+    const onVisible = () => { if (document.visibilityState === 'visible') doSync(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [user?.id, user?.dataMode]);
+
   return (
     <div className="app">
       <Routes>
@@ -27,7 +65,6 @@ export default function App() {
         {!ready ? <Route path="*" element={<Loading />} /> : !user ? (
           <Route path="*" element={<Login />} />
         ) : isNewUser(user) ? (
-          /* Usuario nuevo con Google: completar onboarding antes de ver la app */
           <>
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="*" element={<Navigate to="/onboarding" replace />} />

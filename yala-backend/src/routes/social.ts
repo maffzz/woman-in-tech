@@ -14,13 +14,32 @@ interface LoanRow {
 
 const loanLink = (t: string) => `${config.frontendUrls[0].replace(/\/$/, '')}/p/${t}`;
 
-/** Mensajes de cobro: siempre amables, nunca un reproche. */
-export function reminderMessage(l: Pick<LoanRow, 'friend_nickname' | 'amount' | 'concept' | 'due_date'>, now: Date) {
+/** Mensajes de cobro — 3 niveles: 0=sin cariño, 1=con cariño, 2=mucho cariño */
+export function reminderMessage(
+  l: Pick<LoanRow, 'friend_nickname' | 'amount' | 'concept' | 'due_date'>,
+  now: Date,
+  carinioLevel: 0 | 1 | 2 = 1,
+) {
   const late = new Date(l.due_date).getTime() < now.getTime();
   const what = l.concept ? ` de ${l.concept}` : '';
+  const S = `S/ ${l.amount}`;
+
+  if (carinioLevel === 0) {
+    // Sin cariño — directo y al punto
+    return late
+      ? `${l.friend_nickname}, ya venció el plazo. Me debes ${S}${what}. Págame hoy.`
+      : `${l.friend_nickname}, te debo recordar los ${S}${what}. Para el ${new Date(l.due_date).toISOString().slice(0, 10)}.`;
+  }
+  if (carinioLevel === 2) {
+    // Mucho cariño — super suave, casi da vergüenza cobrar
+    return late
+      ? `Heyyy ${l.friend_nickname} 🥺💕 sé que estás ocupado/a pero si puedes, cuando puedas, los ${S}${what}… sin presión, te quiero igual bb 🫶`
+      : `${l.friend_nickname} bby 🌸 solo un recordatorio chiquitito de los ${S}${what} para el ${new Date(l.due_date).toISOString().slice(0, 10)}. No hay drama ily 💜`;
+  }
+  // Con cariño (nivel 1) — el tono original
   return late
-    ? `Hola ${l.friend_nickname} 🙌 ¿Me ayudas con los S/ ${l.amount}${what} cuando puedas? Un Yape y listo. ¡Gracias!`
-    : `Hola ${l.friend_nickname} 😊 Te recuerdo los S/ ${l.amount}${what}, para el ${new Date(l.due_date).toISOString().slice(0, 10)}. ¡Gracias!`;
+    ? `Hola ${l.friend_nickname} 🙌 ¿Me ayudas con los ${S}${what} cuando puedas? Un Yape y listo. ¡Gracias!`
+    : `Hola ${l.friend_nickname} 😊 Te recuerdo los ${S}${what}, para el ${new Date(l.due_date).toISOString().slice(0, 10)}. ¡Gracias!`;
 }
 
 export const loanDto = (l: LoanRow, now = new Date()) => ({
@@ -191,8 +210,9 @@ export function socialRoutes(db: DB) {
     const u = req.user!; const l = getLoan(db, u, Number(req.params.id)); const now = nowFor(u);
     if (l.direction !== 'lent') throw new HttpError(400, 'Solo puedes recordar préstamos que hiciste tú', 'not_lent');
     if (l.paid_at) throw new HttpError(409, 'Ya está pagado', 'already_paid');
+    const { carinioLevel } = z.object({ carinioLevel: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(1) }).parse(req.body ?? {});
     db.prepare('UPDATE loans SET reminded_at=? WHERE id=?').run(now.toISOString(), l.id);
-    res.json({ message: reminderMessage(l, now), link: loanLink(l.token), loan: loanDto(getLoan(db, u, l.id), now) });
+    res.json({ message: reminderMessage(l, now, carinioLevel), link: loanLink(l.token), loan: loanDto(getLoan(db, u, l.id), now) });
   }));
 
   /** Marca un préstamo como pagado. on_time = pagado antes o el mismo día del vencimiento. */

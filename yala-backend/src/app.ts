@@ -10,12 +10,13 @@ import { dashboardRoutes } from './routes/dashboard';
 import { socialRoutes } from './routes/social';
 import { profileRoutes } from './routes/profile';
 import { budgetRoutes } from './routes/budgets';
+import { friendRoutes } from './routes/friends';
 
 export function createApp(db: DB) {
   const app = express();
   app.use(cors({ origin: config.frontendUrls.includes('*') ? true : config.frontendUrls, credentials: false }));
   app.use(express.json({ limit: '200kb' }));
-  app.use('/api', authRoutes(db), movementRoutes(db), dashboardRoutes(db), socialRoutes(db), profileRoutes(db), budgetRoutes(db));
+  app.use('/api', authRoutes(db), movementRoutes(db), dashboardRoutes(db), socialRoutes(db), profileRoutes(db), budgetRoutes(db), friendRoutes(db));
 
   app.use('/api', (_req, _res, next) => next(new HttpError(404, 'Ruta no encontrada', 'not_found')));
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
