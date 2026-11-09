@@ -3,8 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#6b49d4" />
     <title>Yala</title>
+
+    <!-- PWA: instalable en Android y iOS -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- iOS (Apple) -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Yala" />
+    <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" />
+
+    <!-- Splash screens iOS (los más comunes) -->
+    <link rel="apple-touch-startup-image" href="/icons/apple-splash-1170-2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/icons/apple-splash-1179-2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/icons/apple-splash-1125-2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/icons/apple-splash-1080-2340.png" media="(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3)" />
+
+    <!-- SEO / Open Graph -->
+    <meta name="description" content="Tu plata, tus panas y tu racha. Sin regaños." />
+    <meta property="og:title" content="Yala" />
+    <meta property="og:description" content="Gestiona tus gastos y salidas con amigos." />
+    <meta property="og:image" content="/icons/manifest-icon-512.maskable.png" />
+
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />

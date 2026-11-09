@@ -18,8 +18,32 @@ Operación realizada  Consumo Tarjeta de Débito`;
     expect(p).not.toBeNull();
     expect(p?.type).toBe('expense');
     expect(p?.amount).toBe(29);
-    // El comercio debe aparecer en counterparty
     expect(p?.counterparty).toContain('IZI');
+  });
+
+  // Yapeo recibido — formato confirmado con correo real (datos tapados)
+  it('BCP — yapeo recibido (ingreso)', () => {
+    const raw = `Recibiste un yapeo de S/ 50.00 de Zuniga Castaneda Humberto Alvaro.
+Por tu seguridad, te enviamos los datos de tu yapeo.
+Monto
+Monto recibido  S/ 50.00
+Datos de la operación
+Operación realizada  Yapeo a celular
+Fecha y hora  06 de noviembre de 2026 - 10:32 AM
+Enviado por  Zuniga Castaneda Humberto Alvaro`;
+    const p = parseYapeText(raw, new Date('2026-11-06T12:00:00Z'));
+    expect(p).not.toBeNull();
+    expect(p?.type).toBe('income');
+    expect(p?.amount).toBe(50);
+    expect(p?.counterparty).toContain('Zuniga');
+  });
+
+  // Yapeo recibido — versión corta (solo asunto del correo)
+  it('BCP — yapeo recibido versión corta', () => {
+    const raw = `Recibiste un yapeo de S/ 30.00 de María López.`;
+    const p = parseYapeText(raw, new Date('2026-11-06T12:00:00Z'));
+    expect(p?.type).toBe('income');
+    expect(p?.amount).toBe(30);
   });
 
   // Monto con decimales .50

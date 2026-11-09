@@ -53,7 +53,7 @@ export const api = {
   addMovement: (b: { amount: number; counterparty?: string; category?: Category; type?: 'expense' | 'income' }) => http<Movement>('/movements', { body: b }),
   setCategory: (id: number, category: Category) => http<Movement>(`/movements/${id}/category`, { method: 'PATCH', body: { category } }),
   deleteMovement: (id: number) => http<void>(`/movements/${id}`, { method: 'DELETE' }),
-  paste: (text: string) => http<{ imported: number; duplicates: number; unparsed: number; items: Movement[] }>('/movements/paste', { body: { text } }),
+  paste: (text: string) => http<{ imported: number; duplicates: number; unparsed: number; items: Movement[]; allowanceUpdated: boolean; newAllowance: number | null }>('/movements/paste', { body: { text } }),
   // topes y asistente
   budgets: () => http<Budgets>('/budgets'),
   setBudget: (category: Category, weeklyAmount: number) => http<{ items: BudgetRow[] }>('/budgets', { method: 'PUT', body: { category, weeklyAmount } }),

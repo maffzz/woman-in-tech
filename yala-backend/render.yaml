@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: yala-backend
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_PATH
+        value: /data/yala.db
+      - key: ALLOW_DEMO
+        value: "true"
+      - key: ALLOW_DEMO_CERT
+        value: "true"
+      - key: ALLOW_DEV_LOGIN
+        value: "true"
+      - key: AI_MODE
+        value: auto
+      # Las siguientes se configuran manualmente en el dashboard de Render:
+      # JWT_SECRET, ENCRYPTION_KEY, FRONTEND_URL
+      # GEMINI_API_KEY, AI_PROVIDER, GEMINI_MODEL
+      # GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+      # YAPE_SENDER
+    disk:
+      name: yala-db
+      mountPath: /data
+      sizeGB: 1

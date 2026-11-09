@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fondo morado redondeado -->
+  <rect width="512" height="512" rx="114" fill="#6b49d4"/>
+  <!-- Cabrita GOAT simplificada y centrada -->
+  <g transform="translate(106, 60) scale(2.5)">
+    <!-- cuernos -->
+    <path d="M44 38q-8-14-2-24 8 8 12 24z" fill="#8d8aa8" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M76 38q8-14 2-24-8 8-12 24z" fill="#8d8aa8" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+    <!-- orejas -->
+    <ellipse cx="26" cy="54" rx="13" ry="8" transform="rotate(-25 26 54)" fill="#cfcde6" stroke="#fff" stroke-width="2"/>
+    <ellipse cx="94" cy="54" rx="13" ry="8" transform="rotate(25 94 54)" fill="#cfcde6" stroke="#fff" stroke-width="2"/>
+    <!-- cuerpo cara -->
+    <ellipse cx="60" cy="60" rx="31" ry="29" fill="#fff"/>
+    <!-- anteojos de GOAT -->
+    <path d="M34 54h52v8q0 6-8 6H44q-10 0-10-8z" fill="#2a1a6b" stroke="#fff" stroke-width="1.5"/>
+    <path d="M60 52v8" stroke="#fff" stroke-width="2"/>
+    <!-- corona -->
+    <path d="M40 22l6 8 7-12 7 12 7-12 6 8v8H40z" fill="#ffd34d" stroke="#fff" stroke-width="1.5" transform="translate(0 -4)"/>
+    <!-- nariz -->
+    <ellipse cx="60" cy="76" rx="15" ry="10" fill="#e4defa" stroke="#fff" stroke-width="1.5"/>
+    <circle cx="55" cy="75" r="1.8" fill="#2a1a6b"/>
+    <circle cx="65" cy="75" r="1.8" fill="#2a1a6b"/>
+    <!-- bufanda teal -->
+    <path d="M34 92q26 14 52 0v12q-26 12-52 0z" fill="#5fe8d8" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  <!-- Texto YALA -->
+  <text x="256" y="460" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="96" fill="#fff" text-anchor="middle" letter-spacing="-2">YALA</text>
+</svg>

@@ -39,7 +39,13 @@ export default function Connect() {
       <div className="section-title"><span>O pega tus correos de Yape</span></div>
       <div className="card">
         <label className="field" style={{ marginBottom: 10 }}>Pega aquí uno o varios (sepáralos con una línea ---)<textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="¡Yapeaste S/ 12.50! Destinatario: Bodega Los Andes…" /></label>
-        <button className="btn block" disabled={busy || text.trim().length < 5} onClick={() => run(async () => { const r = await api.paste(text); setToast(`${r.imported} guardados · ${r.duplicates} repetidos · ${r.unparsed} no entendí`); if (r.imported) setText(''); })}>Leer y guardar</button>
+        <button className="btn block" disabled={busy || text.trim().length < 5} onClick={() => run(async () => {
+          const r = await api.paste(text);
+          const parts = [`${r.imported} guardados`, r.duplicates > 0 ? `${r.duplicates} repetidos` : '', r.unparsed > 0 ? `${r.unparsed} no entendí` : ''].filter(Boolean).join(' · ');
+          const allowanceMsg = r.allowanceUpdated && r.newAllowance ? ` 💰 Mesada actualizada a S/ ${r.newAllowance}` : '';
+          setToast(parts + allowanceMsg);
+          if (r.imported) { setText(''); await refresh(); }
+        })}>Leer y guardar</button>
       </div>
 
       <div className="section-title"><span>Modo de datos</span></div>

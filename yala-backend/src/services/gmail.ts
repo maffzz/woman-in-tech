@@ -112,6 +112,12 @@ export async function syncGmail(db: DB, user: UserRow, sinceDays = 90): Promise<
       occurredAt: parsed.occurredAt, amount: parsed.amount, type: parsed.type,
       counterparty: parsed.counterparty, origin: 'gmail', verified: true, emailId: id,
     });
+    // Si es un ingreso (yapeo recibido), sumar a la mesada semanal
+    if (parsed.type === 'income' && parsed.amount >= 20) {
+      const currentAllowance = user.weekly_allowance ?? 0;
+      db.prepare('UPDATE users SET weekly_allowance=? WHERE id=?').run(currentAllowance + parsed.amount, user.id);
+      (user as any).weekly_allowance = currentAllowance + parsed.amount;
+    }
     out.imported++;
   }
   db.prepare(`UPDATE gmail_tokens SET last_sync_at=datetime('now') WHERE user_id=?`).run(user.id);

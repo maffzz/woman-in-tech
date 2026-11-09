@@ -86,8 +86,23 @@ export function parseYapeText(raw: string, fallbackDate = new Date()): ParsedYap
   const n = norm(text);
 
   // ── BCP: "Realizaste un consumo de S/ X con tu Tarjeta de Débito BCP en COMERCIO" ──
+  // ── BCP: "Recibiste un yapeo de S/ X de NOMBRE" (ingreso) ──
   const bcpExpense = /realizaste un consumo de\s+S\/\.?\s*[\d.,]+|consumo con tu tarjeta(?:.*?bcp)?|tarjeta de debito bcp/i;
+  const bcpYapeoIncome = /recibiste un yapeo de\s+S\/|recibiste un yapeo/i;
   const bcpIncome = /abono en tu cuenta|deposito en tu cuenta bcp/i;
+
+  if (bcpYapeoIncome.test(text)) {
+    // "Recibiste un yapeo de S/ 50.00 de Zuniga Castaneda Humberto Alvaro"
+    const amount = parseAmount(text);
+    if (!amount) return null;
+    // Extrae el remitente: "de [Nombre]" después del monto, o campo "Enviado por"
+    let counterparty: string | null = null;
+    const cpEnviadoPor = text.match(/enviado por\s*[:\-]?\s*([^\n\r]{3,60})/i);
+    const cpDe = text.match(/recibiste un yapeo de\s+S\/[\d.,]+\s+de\s+([^\n\r.]{3,60})/i);
+    if (cpEnviadoPor) counterparty = cpEnviadoPor[1].replace(/\s{2,}/g, ' ').trim();
+    else if (cpDe) counterparty = cpDe[1].replace(/\s{2,}/g, ' ').trim();
+    return { amount, type: 'income', counterparty, occurredAt: parseDate(text, fallbackDate) };
+  }
   if (bcpExpense.test(text)) {
     const amount = parseAmount(text);
     if (!amount) return null;

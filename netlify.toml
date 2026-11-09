@@ -1,0 +1,9 @@
+[build]
+  base = "yala-frontend"
+  command = "npm run build"
+  publish = "yala-frontend/dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

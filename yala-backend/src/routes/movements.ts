@@ -43,7 +43,7 @@ export function movementRoutes(db: DB) {
   r.post('/movements/paste', auth, wrap(async (req, res) => {
     const { text } = z.object({ text: z.string().min(5).max(60000) }).parse(req.body);
     const u = req.user!;
-    const out = { imported: 0, duplicates: 0, unparsed: 0, items: [] as ReturnType<typeof toMovementDto>[] };
+    const out = { imported: 0, duplicates: 0, unparsed: 0, items: [] as ReturnType<typeof toMovementDto>[], allowanceUpdated: false, newAllowance: null as number | null };
     for (const chunk of splitPasted(text)) {
       const { parsed } = await parseYapeWithFallback(chunk, aiExtractYape, nowFor(u));
       if (!parsed) { out.unparsed++; continue; }
@@ -53,6 +53,20 @@ export function movementRoutes(db: DB) {
       const { row } = await addMovement(db, u, { ...parsed, origin: 'pegado', verified: false });
       out.imported++;
       out.items.push(toMovementDto(row));
+
+      // Si es un ingreso (yapeo recibido), ofrecer sumarlo a la mesada semanal
+      if (parsed.type === 'income') {
+        const currentAllowance = u.weekly_allowance ?? 0;
+        const newAllowance = currentAllowance + parsed.amount;
+        // Solo actualiza si la mesada no estaba configurada, o si la diferencia es significativa
+        if (!u.weekly_allowance || parsed.amount >= 20) {
+          db.prepare('UPDATE users SET weekly_allowance=? WHERE id=?').run(newAllowance, u.id);
+          // Refresca el usuario en memoria para el resto del loop
+          (u as any).weekly_allowance = newAllowance;
+          out.allowanceUpdated = true;
+          out.newAllowance = newAllowance;
+        }
+      }
     }
     res.json(out);
   }));
