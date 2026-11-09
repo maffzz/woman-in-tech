@@ -23,7 +23,7 @@ export default function Login() {
     <div className="login">
       <Mascot kind="goat" size={150} />
       <h1>Yala</h1>
-      <p className="muted" style={{ maxWidth: 280 }}>Tu plata, tus panas y tu racha. Sin regaños.</p>
+      <p className="muted" style={{ maxWidth: 280 }}>Con Yala, cada yapeo cuenta.</p>
       <div style={{ width: '100%', maxWidth: 320, marginTop: 22, display: 'grid', gap: 10 }}>
         <button className="btn" disabled={busy} onClick={() => run(api.demo)}>Entrar como Diana (demo)</button>
         <button className="btn ghost" disabled={busy} onClick={google}>Continuar con Google</button>

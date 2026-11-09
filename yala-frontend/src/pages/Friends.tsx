@@ -30,7 +30,7 @@ export default function Friends() {
         <SectionBlock
           emoji="➗"
           title="Dividir cuenta"
-          desc="Divide la pizza, el taxi o lo que sea entre tus panas."
+          desc="Divide la pizza, el taxi o lo que sea entre tus amigos."
           color="var(--cyan)"
           onClick={() => setView('dividir')}
         />

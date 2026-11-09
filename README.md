@@ -1,6 +1,6 @@
 # Yala
 
-**Tu plata, tus panas y tu racha. Sin regaños.**
+**Con Yala, cada yapeo cuenta.**
 
 App financiera para adolescentes peruanos de 15 a 17 años que reciben dinero por Yape o BCP. Yala lee tus notificaciones de pago, clasifica tus gastos con IA, te ayuda a gestionar salidas con amigos y construye un perfil de hábitos que, al cumplir 18, puedes compartir con un banco para acceder a tu primera tarjeta de crédito.
 

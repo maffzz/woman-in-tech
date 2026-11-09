@@ -14,7 +14,7 @@ const CHIPS_WEEKLY = [
 ];
 const CHIPS_OUTING = [
   'Tengo S/ 40 para la salida del sábado',
-  'Salgo con mis panas, tenemos S/ 30 en total',
+  'Salgo con mis amigos, tenemos S/ 30 en total',
   '¿Cómo divido S/ 25 para comer, pasajes y algo más?',
 ];
 
