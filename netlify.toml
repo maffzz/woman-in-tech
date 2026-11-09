@@ -1,7 +1,7 @@
 [build]
   base = "yala-frontend"
   command = "npm run build"
-  publish = "yala-frontend/dist"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
