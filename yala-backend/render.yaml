@@ -19,8 +19,8 @@ services:
         value: "true"
       - key: AI_MODE
         value: auto
-      # Las siguientes se configuran manualmente en el dashboard de Render:
-      # JWT_SECRET, ENCRYPTION_KEY, FRONTEND_URL
+      - key: FRONTEND_URL
+        value: https://womanintechyala.netlify.app
       # GEMINI_API_KEY, AI_PROVIDER, GEMINI_MODEL
       # GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
       # YAPE_SENDER
